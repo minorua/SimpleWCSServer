@@ -8,7 +8,10 @@ from coverageDefinition import BoundingBox, WCSCoverage
 # ================================
 
 # Simple server
+hostname = "localhost"
 port = 8000
+host = hostname if port == 80 else "{0}:{1}".format(hostname, port)
+
 accessLogPath = ""            # path to access log file (empty string means access is not logged)
 
 # WCS service

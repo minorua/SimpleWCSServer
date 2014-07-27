@@ -44,7 +44,7 @@ def capabilities(params=None):
   rs = [E(request, "GetCapabilities"), E(request, "DescribeCoverage"), E(request, "GetCoverage")]
   for r in rs:
     e = E(E(E(r, "DCPType"), "HTTP"), "Get")
-    e = E(e, "OnlineResource", {"xlink:type": "simple", "xlink:href": "http://localhost:{0}/wcs.py?".format(settings.port)})
+    e = E(e, "OnlineResource", {"xlink:type": "simple", "xlink:href": "http://{0}/wcs.py?".format(settings.host)})
     #TODO: Post
 
   contentmeta = E(root, "ContentMetadata")

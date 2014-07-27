@@ -37,7 +37,7 @@ def access_log(environ):
     request_method = environ.get("REQUEST_METHOD", "?")
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S.") + "%04d" % (now.microsecond // 1000)
     user_agent = environ.get("HTTP_USER_AGENT", "?")
-    url = "http://localhost:8000" + environ.get("PATH_INFO", " ") + "?" + environ.get("QUERY_STRING", " ")
+    url = "http://" + settings.host + environ.get("PATH_INFO", " ") + "?" + environ.get("QUERY_STRING", " ")
     f.write('%s [%s] %s "%s %s"\n' % (remote_addr, timestamp, user_agent, request_method, url))
     #f.write(",".join([remote_addr, timestamp, user_agent, request_method, url]) + "\n")
 
