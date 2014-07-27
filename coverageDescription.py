@@ -37,8 +37,7 @@ def coverageDescription(params=None):
 
   doc = MyXMLDocument()
   E = doc.append
-  root = E(None, "CoverageDescription", {"version": "1.0.0",        #TODO: version?
-                                         "xmlns": "http://www.opengis.net/wcs",
+  root = E(None, "CoverageDescription", {"xmlns": "http://www.opengis.net/wcs",
                                          "xmlns:gml": "http://www.opengis.net/gml"})
   coverages = []
   identifier = params.get("COVERAGE")
@@ -56,7 +55,7 @@ def coverageDescription(params=None):
     crs.ImportFromEPSG(coverage.epsg_code)
     trans = osr.CoordinateTransformation(wgs84, crs)
 
-    offering = E(root, "CoverageOffering", {"version": "1.0.0"})    #TODO: version?
+    offering = E(root, "CoverageOffering", {"version": "1.0.0"})
     E(offering, "name", text=coverage.identifier)
     E(offering, "label", text=coverage.label)
 

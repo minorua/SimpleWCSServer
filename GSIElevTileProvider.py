@@ -86,7 +86,7 @@ class GSIElevTileProvider:
     width = cols * TILE_SIZE
     height = rows * TILE_SIZE
     res = size / TILE_SIZE
-    geotransform = [ulx * size - TSIZE1, res, 0, (matrixSize - uly) * size - TSIZE1, 0, -res]  #TODO: confirm
+    geotransform = [ulx * size - TSIZE1, res, 0, TSIZE1 - uly * size, 0, -res]
 
     mem_driver = gdal.GetDriverByName("MEM")
     ds = mem_driver.Create("", width, height, 1, gdal.GDT_Float32, [])
@@ -108,10 +108,10 @@ class GSIElevTileProvider:
     ds.FlushCache()
     return ds
 
-  def fetchFiles(self, urlbase, zoom, xmin, ymin, xmax, ymax):
+  def fetchFiles(self, urltmpl, zoom, xmin, ymin, xmax, ymax):
     if self.fetchLogPath:
       with open(self.fetchLogPath, "a") as f:
-        f.write(", ".join(map(str, [urlbase, zoom, xmin, ymin, xmax, ymax])) + "\n")
+        f.write(", ".join(map(str, [urltmpl, zoom, xmin, ymin, xmax, ymax])) + "\n")
         f.write(os.path.join(self.cacheRoot, str(zoom)) + "\n")
 
     ext = ""
@@ -139,7 +139,7 @@ class GSIElevTileProvider:
             continue
 
         # make url
-        url = urlbase.replace("{x}", str(x)).replace("{y}", str(y)).replace("{z}", str(zoom))
+        url = urltmpl.replace("{x}", str(x)).replace("{y}", str(y)).replace("{z}", str(zoom))
         if self.fetchLogPath:
           with open(self.fetchLogPath, "a") as f:
             f.write(url + "\n")
@@ -152,10 +152,9 @@ class GSIElevTileProvider:
           data = ""
 
         if data:
-          #array = np.zeros(TILE_SIZE * TILE_SIZE, dtype=np.float32)
-          data = np.fromstring(data.replace("e", "-9999").replace("\n", ","), dtype=np.float32, sep=",").tostring()
+          data = np.fromstring(data.replace("e", "-9999").replace("\n", ","), dtype=np.float32, sep=",").tostring()   # to byte array
 
-        fetchedFiles.append(data)   # to byte array
+        fetchedFiles.append(data)
 
         # cache
         if self.cacheRoot:
