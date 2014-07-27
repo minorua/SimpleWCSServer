@@ -36,6 +36,8 @@ def tempMemFilePath():
   global memFileIndex
   path = "/vsimem/wcs_tmp{0}.tif".format(memFileIndex)
   memFileIndex += 1
+  if memFileIndex > 9999:
+    memFileIndex = 0
   return path
 
 def coverage(params=None):
