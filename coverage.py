@@ -103,12 +103,11 @@ def coverage(params=None):
   else:
     gdal.ReprojectImage(src_ds, dst_ds, None, None, gdal.GRA_Bilinear)
 
-  band = dst_ds.GetRasterBand(1)
-
   if coverage.shade:
     # hillshade
     # http://geoexamples.blogspot.com/2014/03/shaded-relief-images-using-gdal-python.html
-    array = np.fromstring(band.ReadRaster(0, 0, xsize, ysize, xsize, ysize, gdal.GDT_Float32), dtype=np.float32, count=xsize * ysize)
+    array = np.fromstring(dst_ds.GetRasterBand(1).ReadRaster(0, 0, xsize, ysize, xsize, ysize, gdal.GDT_Float32),
+                          dtype=np.float32, count=xsize * ysize)
     array = array.reshape((ysize, xsize))
     azimuth = 315
     angle_altitude = 45
@@ -126,11 +125,11 @@ def coverage(params=None):
     dst_ds = driver.Create(filename, xsize, ysize, 1, gdal.GDT_Byte, [])
     dst_ds.SetProjection(crs.ExportToWkt())
     dst_ds.SetGeoTransform(geotransform)
-    band = dst_ds.GetRasterBand(1)
-    band.WriteRaster(0, 0, xsize, ysize, shade.tostring())
+    dst_ds.GetRasterBand(1).WriteRaster(0, 0, xsize, ysize, shade.tostring())
   else:
-    nodata_value = -9999
-    band.SetNoDataValue(nodata_value)
+    nodata_value = src_ds.GetRasterBand(1).GetNoDataValue()
+    if nodata_value is not None:
+      dst_ds.GetRasterBand(1).SetNoDataValue(nodata_value)
 
   # make sure that all data have been written
   dst_ds.FlushCache()

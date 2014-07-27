@@ -34,6 +34,7 @@ import settings
 
 TILE_SIZE = 256
 TSIZE1 = 20037508.342789244
+NODATA_VALUE = 0
 ZMAX = 14
 
 class GSIElevTileProvider:
@@ -136,7 +137,11 @@ class GSIElevTileProvider:
           cachePath = os.path.join(cacheDir, str(y) + ext)
           if os.path.exists(cachePath):
             with open(cachePath, "rb") as f:
-              fetchedFiles.append(f.read())
+              data = f.read()
+            if data:
+              fetchedFiles.append(data)
+            else:
+              fetchedFiles.append(np.array([NODATA_VALUE] * TILE_SIZE * TILE_SIZE, dtype=np.float32).tostring())
             continue
 
         # make url
@@ -155,9 +160,10 @@ class GSIElevTileProvider:
           data = ""
 
         if data:
-          data = np.fromstring(data.replace("e", "-9999").replace("\n", ","), dtype=np.float32, sep=",").tostring()   # to byte array
-
-        fetchedFiles.append(data)
+          data = np.fromstring(data.replace("e", str(NODATA_VALUE)).replace("\n", ","), dtype=np.float32, sep=",").tostring()   # to byte array
+          fetchedFiles.append(data)
+        else:
+          fetchedFiles.append(np.array([NODATA_VALUE] * TILE_SIZE * TILE_SIZE, dtype=np.float32).tostring())
 
         # cache
         if self.cacheRoot:
