@@ -58,6 +58,7 @@ def coverageDescription(params=None):
     offering = E(root, "CoverageOffering", {"version": "1.0.0"})
     E(offering, "name", text=coverage.identifier)
     E(offering, "label", text=coverage.label)
+    E(offering, "description", text=coverage.description)
 
     e = E(offering, "lonLatEnvelope", {"srsName": "urn:ogc:def:crs:EPSG::4326"})
     E(e, "gml:pos", text="{0} {1}".format(env.xmin, env.ymin))

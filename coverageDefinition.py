@@ -31,10 +31,11 @@ class BoundingBox:
 
 class WCSCoverage:
   """ class that holds coverage definition """
-  def __init__(self, identifier, source, epsg_code, lonLatEnvelope=None, label="", shade=False):
+  def __init__(self, identifier, source, epsg_code, lonLatEnvelope=None, label="", description="", shade=False):
     self.identifier = identifier
     self.source = source
     self.epsg_code = epsg_code
     self.lonLatEnvelope = lonLatEnvelope if lonLatEnvelope else BoundingBox(-180, -85.05, 180, 85.05)
     self.label = label
+    self.description = description
     self.shade = shade

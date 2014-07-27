@@ -43,6 +43,7 @@ class GSIElevTileProvider:
     if self.cacheRoot:
       self.cacheRoot = os.path.join(os.path.dirname(__file__), self.cacheRoot, "gsitile")
     self.fetchLogPath = settings.fetchLogPath
+    self.userAgent = settings.userAgent
 
     self.wgs84 = osr.SpatialReference()
     self.wgs84.ImportFromEPSG(4326)
@@ -77,7 +78,7 @@ class GSIElevTileProvider:
       return None
 
     tiles = self.fetchFiles("http://cyberjapandata.gsi.go.jp/xyz/dem/{z}/{x}/{y}.txt", zoom, ulx, uly, lrx, lry)
-    #tiles = self.fetchFiles("http://localhost:8000/xyz/dem/{z}/{x}/{y}.txt", zoom, ulx, uly, lrx, lry)
+    #tiles = self.fetchFiles("http://localhost/xyz/dem/{z}/{x}/{y}.txt", zoom, ulx, uly, lrx, lry)
 
     if self.fetchLogPath:
       with open(self.fetchLogPath, "a") as f:
@@ -146,7 +147,9 @@ class GSIElevTileProvider:
 
         # download
         try:
-          response = urllib2.urlopen(url)
+          request = urllib2.Request(url)
+          request.add_header("User-agent", self.userAgent)
+          response = urllib2.urlopen(request)
           data = response.read()
         except:
           data = ""

@@ -52,6 +52,7 @@ def capabilities(params=None):
     brief = E(contentmeta, "CoverageOfferingBrief")
     E(brief, "name", text=coverage.identifier)
     E(brief, "label", text=coverage.label)
+    E(brief, "description", text=coverage.description)
 
     e = E(brief, "lonLatEnvelope", {"srsName": "urn:ogc:def:crs:EPSG::4326"})
     env = coverage.lonLatEnvelope
