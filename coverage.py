@@ -106,22 +106,26 @@ def coverage(params=None):
     gdal.ReprojectImage(src_ds, dst_ds, None, None, gdal.GRA_Bilinear)
 
   if coverage.shade:
-    # hillshade
+    # create hillshade
     # http://geoexamples.blogspot.com/2014/03/shaded-relief-images-using-gdal-python.html
+    # http://github.com/OSGeo/gdal/blob/trunk/gdal/apps/gdaldem.cpp
+    azimuth = 315
+    angle_altitude = 45
+    az = azimuth * math.pi / 180
+    alt = angle_altitude * math.pi / 180
+    scale = 1 if crs.IsProjected() else 111120
+
     array = np.fromstring(dst_ds.GetRasterBand(1).ReadRaster(0, 0, xsize, ysize, xsize, ysize, gdal.GDT_Float32),
                           dtype=np.float32, count=xsize * ysize)
     array = array.reshape((ysize, xsize))
-    azimuth = 315
-    angle_altitude = 45
 
-    x, y = np.gradient(array)
-    slope = math.pi / 2. - np.arctan(np.sqrt(x * x + y * y))
-    aspect = np.arctan2(-x, y)
-    azimuthrad = azimuth * math.pi / 180
-    altituderad = angle_altitude * math.pi / 180
+    y, x = np.gradient(array, -geotransform[5] * scale, geotransform[1] * scale)  # x: (Zright - Zleft) / (2 * xres), y: (Zdown - Zup) / (2 * yres)
+    slope = math.pi / 2 - np.arctan(np.sqrt(x * x + y * y))
+    aspect = math.pi / 2 - np.arctan2(y, -x)
 
-    shade = math.sin(altituderad) * np.sin(slope) + math.cos(altituderad) * np.cos(slope) * np.cos(azimuthrad - aspect)
-    shade = np.uint8(255 * (shade + 1) / 2)
+    shade = math.sin(alt) * np.sin(slope) + math.cos(alt) * np.cos(slope) * np.cos(az - aspect)
+    #shade = np.uint8(255 * (shade + 1) / 2)
+    shade = np.uint8(255 * np.fmax(shade, np.zeros((ysize, xsize), dtype=np.float32)))
 
     gdal.Unlink(filename)
     dst_ds = driver.Create(filename, xsize, ysize, 1, gdal.GDT_Byte, [])
