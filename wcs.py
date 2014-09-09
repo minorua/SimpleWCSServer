@@ -64,8 +64,8 @@ def application(environ, start_response):
   request = params.get("REQUEST")
   if request == "GetCoverage":
     from coverage import coverage
-    data = coverage(params)
-    if data:
+    statusCode, data = coverage(params)
+    if statusCode == 200:
       start_response("200 OK", [("Content-Type", "image/tiff")])
       return [data]
     return error_response(start_response, "400 Bad Request")    #TODO: status code

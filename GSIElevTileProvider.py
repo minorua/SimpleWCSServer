@@ -76,7 +76,7 @@ class GSIElevTileProvider:
     # download count limit
     count = cols * rows
     if count > 64:
-      return None
+      return None   #TODO: Error message
 
     tiles = self.fetchFiles("http://cyberjapandata.gsi.go.jp/xyz/dem/{z}/{x}/{y}.txt", zoom, ulx, uly, lrx, lry)
     #tiles = self.fetchFiles("http://localhost/xyz/dem/{z}/{x}/{y}.txt", zoom, ulx, uly, lrx, lry)
@@ -141,7 +141,9 @@ class GSIElevTileProvider:
             if data:
               fetchedFiles.append(data)
             else:
-              fetchedFiles.append(np.array([NODATA_VALUE] * TILE_SIZE * TILE_SIZE, dtype=np.float32).tostring())
+              array = np.empty(TILE_SIZE * TILE_SIZE, dtype=np.float32)
+              array.fill(NODATA_VALUE)
+              fetchedFiles.append(array.tostring())
             continue
 
         # make url
@@ -163,7 +165,9 @@ class GSIElevTileProvider:
           data = np.fromstring(data.replace("e", str(NODATA_VALUE)).replace("\n", ","), dtype=np.float32, sep=",").tostring()   # to byte array
           fetchedFiles.append(data)
         else:
-          fetchedFiles.append(np.array([NODATA_VALUE] * TILE_SIZE * TILE_SIZE, dtype=np.float32).tostring())
+          array = np.empty(TILE_SIZE * TILE_SIZE, dtype=np.float32)
+          array.fill(NODATA_VALUE)
+          fetchedFiles.append(array.tostring())
 
         # cache
         if self.cacheRoot:

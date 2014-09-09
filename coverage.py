@@ -70,7 +70,7 @@ def coverage(params=None):
         coverage = cv
         break
   if not coverage:
-    return ""
+    return 400, ""
 
   crs = osr.SpatialReference()
   crs_param = params.get("CRS", "")
@@ -87,13 +87,13 @@ def coverage(params=None):
     src_ds = gdal.Open(coverage.source, gdal.GA_ReadOnly)
 
   if src_ds is None:
-    return ""
+    return 500, ""
 
   # create a virtual file in memory
   filename = tempMemFilePath()
   dst_ds = driver.Create(filename, xsize, ysize, 1, gdal.GDT_Float32, [])
   if dst_ds is None:
-    return ""
+    return 500, ""
 
   geotransform = [xmin, (xmax - xmin) / xsize, 0, ymax, 0, (ymin - ymax) / ysize]
   dst_ds.SetProjection(crs.ExportToWkt())
@@ -121,11 +121,12 @@ def coverage(params=None):
 
     y, x = np.gradient(array, -geotransform[5] * scale, geotransform[1] * scale)  # x: (Zright - Zleft) / (2 * xres), y: (Zdown - Zup) / (2 * yres)
     slope = math.pi / 2 - np.arctan(np.sqrt(x * x + y * y))
-    aspect = math.pi / 2 - np.arctan2(y, -x)
+    #aspect = math.pi / 2 - np.arctan2(y, -x)
+    az_minus_aspect = az - math.pi / 2 + np.arctan2(y, -x)
 
-    shade = math.sin(alt) * np.sin(slope) + math.cos(alt) * np.cos(slope) * np.cos(az - aspect)
+    shade = math.sin(alt) * np.sin(slope) + math.cos(alt) * np.cos(slope) * np.cos(az_minus_aspect)
     #shade = np.uint8(255 * (shade + 1) / 2)
-    shade = np.uint8(255 * np.fmax(shade, np.zeros((ysize, xsize), dtype=np.float32)))
+    shade = np.uint8(255 * np.clip(shade, 0, 1))
 
     gdal.Unlink(filename)
     dst_ds = driver.Create(filename, xsize, ysize, 1, gdal.GDT_Byte, [])
@@ -148,7 +149,7 @@ def coverage(params=None):
   # remove the memory file
   gdal.Unlink(filename)
 
-  return buffer
+  return 200, buffer
 
 if __name__ == "__main__":
   data = coverage()
