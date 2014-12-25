@@ -1,0 +1,4 @@
+<WCS_GDAL>
+  <ServiceURL>http://localhost:8000/wcs.py?</ServiceURL>
+  <CoverageName>GSIDEM</CoverageName>
+</WCS_GDAL>
